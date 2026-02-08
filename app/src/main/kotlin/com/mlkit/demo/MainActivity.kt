@@ -25,7 +25,10 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
+import com.mlkit.demo.camera.CameraAnalyzer
 import com.mlkit.demo.camera.CameraManager
+import com.mlkit.demo.mlkit.ObjectDetectionAnalyzer
+import org.koin.compose.koinInject
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -81,11 +84,13 @@ fun CameraScreen() {
 fun CameraPreview() {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
-    val cameraManager = remember { CameraManager(context) }
+    val cameraManager: CameraManager = koinInject()
+    val objectDetectionAnalyzer: ObjectDetectionAnalyzer = koinInject()
+    val cameraAnalyzer = remember { CameraAnalyzer(objectDetectionAnalyzer) }
     val previewView = remember { PreviewView(context) }
 
     LaunchedEffect(Unit) {
-        cameraManager.startCamera(lifecycleOwner, previewView)
+        cameraManager.startCamera(lifecycleOwner, previewView, cameraAnalyzer)
     }
 
     AndroidView(

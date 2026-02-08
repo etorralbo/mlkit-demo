@@ -48,4 +48,11 @@ dependencies {
     implementation(libs.androidx.camera.lifecycle)
     implementation(libs.androidx.camera.view)
     implementation(libs.androidx.lifecycle.runtime.ktx)
+    implementation(libs.google.mlkit.obj.detection)
+    implementation(libs.google.mlkit.image.labeling)
+    implementation(libs.google.mlkit.vision.common)
+    implementation(libs.koin.android)
+    implementation(libs.koin.compose)
+    implementation(libs.kotlinx.coroutines.android)
+    implementation(libs.kotlinx.coroutines.play.services)
 }
