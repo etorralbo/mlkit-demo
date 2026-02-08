@@ -87,6 +87,9 @@ Or use Android Studio's Run button (▶️)
 | Koin | 4.0.1 | Dependency injection |
 | Coroutines | 1.10.1 | Async operations |
 | ViewModel + StateFlow | 2.8.7 | State management |
+| JUnit 4 | 4.13.2 | Unit testing framework |
+| Coroutines Test | 1.10.1 | Testing coroutines |
+| Turbine | 1.1.0 | Testing Flow emissions |
 
 ## 📱 How It Works
 
@@ -130,18 +133,22 @@ ImageLabelerOptions.confidenceThreshold(0.70f)  // 70% confidence
 mlkit-demo/
 ├── app/
 │   ├── build.gradle.kts
-│   └── src/main/
-│       ├── AndroidManifest.xml
+│   ├── src/main/
+│   │   ├── AndroidManifest.xml
+│   │   └── kotlin/com/mlkit/demo/
+│   │       ├── DemoApplication.kt
+│   │       ├── MainActivity.kt
+│   │       ├── camera/
+│   │       ├── mlkit/
+│   │       ├── ui/
+│   │       ├── viewmodel/
+│   │       ├── model/
+│   │       ├── utils/
+│   │       └── di/
+│   └── src/test/
 │       └── kotlin/com/mlkit/demo/
-│           ├── DemoApplication.kt
-│           ├── MainActivity.kt
-│           ├── camera/
-│           ├── mlkit/
-│           ├── ui/
-│           ├── viewmodel/
-│           ├── model/
-│           ├── utils/
-│           └── di/
+│           └── viewmodel/
+│               └── DemoViewModelTest.kt
 ├── gradle/
 │   └── libs.versions.toml
 └── build.gradle.kts
@@ -154,6 +161,33 @@ mlkit-demo/
 - **Positioning**: Label floats above bounding box with 8dp minimum top margin
 
 ## 🧪 Testing
+
+### Unit Tests
+
+The project includes comprehensive unit tests for the ViewModel logic:
+
+```bash
+./gradlew testDebugUnitTest
+```
+
+**Test Coverage:**
+- ✅ Initial state validation
+- ✅ Detection state emission
+- ✅ 4-second display duration
+- ✅ 1-second cooldown period
+- ✅ Detection cycle enforcement (ignores detections during active cycle)
+- ✅ Manual state clearing
+- ✅ Multiple sequential detections
+- ✅ Coroutine cancellation handling
+
+**Test File:** `app/src/test/kotlin/com/mlkit/demo/viewmodel/DemoViewModelTest.kt`
+
+**Technologies Used:**
+- JUnit 4 for test framework
+- Kotlinx Coroutines Test for testing coroutines with virtual time
+- Turbine for testing Flow emissions
+
+### Manual Testing
 
 Run the app and point your camera at various objects:
 - ✅ Objects should be detected within 1-2 seconds
