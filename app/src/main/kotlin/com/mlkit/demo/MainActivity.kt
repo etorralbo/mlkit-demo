@@ -122,9 +122,13 @@ fun CameraPreview() {
             modifier = Modifier.fillMaxSize()
         )
 
-        // Bounding box overlay
+        // Bounding box overlay with label
         detectionState?.let { state ->
-            BoundingBoxOverlay(boundingBox = state.boundingBox)
+            BoundingBoxOverlay(
+                label = state.label,
+                confidence = state.confidence,
+                boundingBox = state.boundingBox
+            )
         }
     }
 }
