@@ -1,6 +1,7 @@
 package com.mlkit.demo
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.content.pm.PackageManager
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -29,6 +30,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.mlkit.demo.camera.CameraAnalyzer
 import com.mlkit.demo.camera.CameraManager
@@ -87,6 +89,7 @@ fun CameraScreen() {
     }
 }
 
+@SuppressLint("UnusedBoxWithConstraintsScope")
 @Composable
 fun CameraPreview() {
     val context = LocalContext.current
@@ -96,7 +99,6 @@ fun CameraPreview() {
     val objectDetectionAnalyzer: ObjectDetectionAnalyzer = koinInject()
     val viewModel: DemoViewModel = viewModel()
     val detectionState by viewModel.detectionState.collectAsState()
-    val previewView = remember { PreviewView(context) }
 
     BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
         val viewWidth = with(density) { maxWidth.toPx().toInt() }
@@ -106,19 +108,11 @@ fun CameraPreview() {
             CameraAnalyzer(objectDetectionAnalyzer, viewModel, viewWidth, viewHeight)
         }
 
-        LaunchedEffect(cameraAnalyzer) {
-            cameraManager.startCamera(lifecycleOwner, previewView, cameraAnalyzer)
-        }
-
-        DisposableEffect(Unit) {
-            onDispose {
-                cameraManager.shutdown()
-            }
-        }
-
-        // Camera preview
-        AndroidView(
-            factory = { previewView },
+        // Camera preview with CameraX
+        CameraXPreviewView(
+            cameraManager = cameraManager,
+            lifecycleOwner = lifecycleOwner,
+            cameraAnalyzer = cameraAnalyzer,
             modifier = Modifier.fillMaxSize()
         )
 
@@ -131,4 +125,30 @@ fun CameraPreview() {
             )
         }
     }
+}
+
+@Composable
+internal fun CameraXPreviewView(
+    cameraManager: CameraManager,
+    lifecycleOwner: LifecycleOwner,
+    cameraAnalyzer: CameraAnalyzer,
+    modifier: Modifier = Modifier
+) {
+    val context = LocalContext.current
+    val previewView = remember { PreviewView(context) }
+
+    LaunchedEffect(cameraAnalyzer) {
+        cameraManager.startCamera(lifecycleOwner, previewView, cameraAnalyzer)
+    }
+
+    DisposableEffect(Unit) {
+        onDispose {
+            cameraManager.shutdown()
+        }
+    }
+
+    AndroidView(
+        factory = { previewView },
+        modifier = modifier
+    )
 }
