@@ -8,7 +8,9 @@ import com.mlkit.demo.camera.CameraManager
 import com.mlkit.demo.mlkit.ObjectDetectionAnalyzer
 import com.mlkit.demo.mlkit.vision.ImageLabelingAnalyzer
 import com.mlkit.demo.mlkit.vision.ObjectDetectionDetector
+import com.mlkit.demo.viewmodel.DemoViewModel
 import org.koin.android.ext.koin.androidContext
+import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
 
 val demoModule = module {
@@ -32,4 +34,5 @@ val demoModule = module {
     single { ImageLabelingAnalyzer(get()) }
     single { ObjectDetectionAnalyzer(get(), get()) }
     single { CameraManager(androidContext()) }
+    viewModel { DemoViewModel() }
 }

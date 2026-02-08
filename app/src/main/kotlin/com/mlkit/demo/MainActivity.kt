@@ -9,6 +9,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.camera.view.PreviewView
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -16,19 +17,24 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.mlkit.demo.camera.CameraAnalyzer
 import com.mlkit.demo.camera.CameraManager
 import com.mlkit.demo.mlkit.ObjectDetectionAnalyzer
+import com.mlkit.demo.ui.BoundingBoxOverlay
+import com.mlkit.demo.viewmodel.DemoViewModel
 import org.koin.compose.koinInject
 
 class MainActivity : ComponentActivity() {
@@ -85,23 +91,40 @@ fun CameraScreen() {
 fun CameraPreview() {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
+    val density = LocalDensity.current
     val cameraManager: CameraManager = koinInject()
     val objectDetectionAnalyzer: ObjectDetectionAnalyzer = koinInject()
-    val cameraAnalyzer = remember { CameraAnalyzer(objectDetectionAnalyzer) }
+    val viewModel: DemoViewModel = viewModel()
+    val detectionState by viewModel.detectionState.collectAsState()
     val previewView = remember { PreviewView(context) }
 
-    LaunchedEffect(Unit) {
-        cameraManager.startCamera(lifecycleOwner, previewView, cameraAnalyzer)
-    }
+    BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+        val viewWidth = with(density) { maxWidth.toPx().toInt() }
+        val viewHeight = with(density) { maxHeight.toPx().toInt() }
 
-    DisposableEffect(Unit) {
-        onDispose {
-            cameraManager.shutdown()
+        val cameraAnalyzer = remember(viewWidth, viewHeight) {
+            CameraAnalyzer(objectDetectionAnalyzer, viewModel, viewWidth, viewHeight)
+        }
+
+        LaunchedEffect(cameraAnalyzer) {
+            cameraManager.startCamera(lifecycleOwner, previewView, cameraAnalyzer)
+        }
+
+        DisposableEffect(Unit) {
+            onDispose {
+                cameraManager.shutdown()
+            }
+        }
+
+        // Camera preview
+        AndroidView(
+            factory = { previewView },
+            modifier = Modifier.fillMaxSize()
+        )
+
+        // Bounding box overlay
+        detectionState?.let { state ->
+            BoundingBoxOverlay(boundingBox = state.boundingBox)
         }
     }
-
-    AndroidView(
-        factory = { previewView },
-        modifier = Modifier.fillMaxSize()
-    )
 }

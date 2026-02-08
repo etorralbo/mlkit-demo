@@ -48,6 +48,7 @@ dependencies {
     implementation(libs.androidx.camera.lifecycle)
     implementation(libs.androidx.camera.view)
     implementation(libs.androidx.lifecycle.runtime.ktx)
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.google.mlkit.obj.detection)
     implementation(libs.google.mlkit.image.labeling)
     implementation(libs.google.mlkit.vision.common)
