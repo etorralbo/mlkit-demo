@@ -19,6 +19,12 @@ import java.io.ByteArrayOutputStream
  */
 internal fun ImageProxy.toCustomBitmap(): Bitmap? {
     return try {
+        // Validate image format
+        if (format != ImageFormat.YUV_420_888) {
+            Log.e("ImageProxyExtension", "Unsupported format: $format")
+            return null
+        }
+
         // CameraX provides YUV_420_888 format, convert to RGB Bitmap
         val yuvBytes = yuv420ToByteArray()
         val yuvImage = YuvImage(
@@ -62,8 +68,13 @@ private fun ImageProxy.yuv420ToByteArray(): ByteArray {
     val uBuffer = planes[1].buffer
     val vBuffer = planes[2].buffer
 
+    // Read Y plane with bounds checking
     yBuffer.rewind()
-    yBuffer.get(nv21, 0, ySize)
+    val yBufferSize = yBuffer.remaining()
+    if (yBufferSize < ySize) {
+        Log.e("ImageProxyExtension", "Y buffer too small: $yBufferSize < $ySize")
+    }
+    yBuffer.get(nv21, 0, minOf(ySize, yBufferSize))
 
     // Interleave U and V planes into NV21 format (VUVUVU...)
     val uvPixelStride = planes[1].pixelStride

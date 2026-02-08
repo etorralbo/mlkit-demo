@@ -16,7 +16,7 @@ val demoModule = module {
         val options = ObjectDetectorOptions.Builder()
             .setDetectorMode(ObjectDetectorOptions.STREAM_MODE)
             .enableMultipleObjects()
-            .enableClassification()
+            // .enableClassification() - We use ImageLabeling for classification instead
             .build()
         ObjectDetection.getClient(options)
     }
